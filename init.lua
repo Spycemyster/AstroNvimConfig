@@ -31,9 +31,9 @@ return {
     formatting = {
       -- control auto formatting on save
       format_on_save = {
-        enabled = true, -- enable or disable format on save globally
+        enabled = false, -- enable or disable format on save globally
         allow_filetypes = { -- enable format on save for specified filetypes only
-          -- "go",
+          -- "cs",
         },
         ignore_filetypes = { -- disable format on save for specified filetypes
           -- "python",
@@ -43,7 +43,7 @@ return {
         -- disable lua_ls formatting capability if you want to use StyLua to format your lua code
         -- "lua_ls",
       },
-      timeout_ms = 1000, -- default format timeout
+      timeout_ms = 3000, -- default format timeout
       -- filter = function(client) -- fully override the default formatting function
       --   return true
       -- end
@@ -69,6 +69,20 @@ return {
   -- augroups/autocommands and custom filetypes also this just pure lua so
   -- anything that doesn't fit in the normal config locations above can go here
   polish = function()
+    -- vim.api.nvim_set_keymap('l', '<leader>lF', ':NeoFormat<CR>', { noremap = true, silent = true })
+    vim.keymap.set('n', '<Leader>lk', function()
+      vim.lsp.buf.hover()
+    end, { silent = true, noremap = true, desc = 'Hover current symbol' })
+    vim.keymap.set('n', '<Leader>lg', '<cmd>Telescope lsp_definitions<cr>', { silent = true, noremap = true, desc = 'Go to Definition'})
+    vim.g.editorconfig = true
+
+    vim.opt.tabstop = 4
+    vim.opt.shiftwidth = 4
+    vim.opt.expandtab = true
+    vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', { expr = true, replace_keycodes = false, silent = true, noremap = true, desc = "Accept Copilot Suggestion"})
+    vim.g.copilot_no_tab_map = true
+    vim.g.copilot_assume_mapped = true
+    -- vim.keymap.set('i', '<C-J>', 'copilot#Accept("<CR>")', { silent = true, noremap = true, desc = "Accept Copilot Suggestion"})
     -- Set up custom filetypes
     -- vim.filetype.add {
     --   extension = {
