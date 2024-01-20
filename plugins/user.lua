@@ -13,5 +13,13 @@ return {
     {
         "github/copilot.vim",
         event = "InsertEnter"
+    },
+    {
+        "mfussenegger/nvim-dap",
+        enabled = true,
+    },
+    {
+        "rcarriga/nvim-dap-ui",
     }
+
 }

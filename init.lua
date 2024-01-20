@@ -82,18 +82,35 @@ return {
     vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', { expr = true, replace_keycodes = false, silent = true, noremap = true, desc = "Accept Copilot Suggestion"})
     vim.g.copilot_no_tab_map = true
     vim.g.copilot_assume_mapped = true
-    -- vim.keymap.set('i', '<C-J>', 'copilot#Accept("<CR>")', { silent = true, noremap = true, desc = "Accept Copilot Suggestion"})
-    -- Set up custom filetypes
-    -- vim.filetype.add {
-    --   extension = {
-    --     foo = "fooscript",
-    --   },
-    --   filename = {
-    --     ["Foofile"] = "fooscript",
-    --   },
-    --   pattern = {
-    --     ["~/%.config/foo/.*"] = "fooscript",
-    --   },
-    -- }
+    local dap = require('dap')
+    dap.adapters.coreclr = {
+      type = 'executable',
+      command = 'C:/Program Files/Netcoredbg/netcoredbg.exe',
+      args = { '--interpreter=vscode'},
+      options = {
+        detached = false,
+      }
+    }
+
+    dap.configurations.cs = {
+      {
+        type = 'coreclr',
+        name = 'launch - netcoredbg',
+        request = 'launch',
+        program = function()
+          return vim.fn.input('Path to dll', vim.fn.getcwd() .. '/', 'file')
+        end,
+      }
+    }
+
+    -- vim.keymap.set('n', '<F10>', function() require('dap').step_out() end)
+    -- vim.keymap.set('n', '<F9>', function() require('dap').step_into() end)
+    -- vim.keymap.set('n', '<F8>', function() require('dap').step_over() end)
+    -- vim.keymap.set('n', '<F5>', function() require('dap').continue() end)
+    -- vim.keymap.set('n', '<Leader>db', function() require('dap').toggle_breakpoint() end)
+    -- vim.keymap.set('n', '<Leader>dB', function() require('dap').set_breakpoint() end)
+    -- vim.keymap.set('n', '<Leader>dr', function() require('dap').repl.open() end)
+    -- vim.keymap.set('n', '<Leader>dl', function() require('dap').run_last() end)
+    -- vim.keymap.set('n', '<Leader>dh', function() require('dap.ui.widgets').hover() end)
   end,
 }
