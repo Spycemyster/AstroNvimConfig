@@ -73,23 +73,31 @@ return {
     vim.keymap.set('n', '<Leader>lk', function()
       vim.lsp.buf.hover()
     end, { silent = true, noremap = true, desc = 'Hover current symbol' })
-    vim.keymap.set('n', '<Leader>lg', '<cmd>Telescope lsp_definitions<cr>', { silent = true, noremap = true, desc = 'Go to Definition'})
+    -- vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', { silent = true, noremap = true, desc = 'Go to Definition'})
+    vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', { silent = true, noremap = true, desc = 'Go to Declaration'})
+    vim.keymap.set('n', '<Leader>la', '<cmd>lua vim.lsp.buf.code_action()<CR>', { silent = true, noremap = true, desc = 'Code Action'})
+    -- vim.keymap.set('n', '<Leader>lg', '<cmd>Telescope lsp_definitions<cr>', { silent = true, noremap = true, desc = 'Go to Definition'})
+    vim.keymap.set("n", "<Leader>lg", "<Cmd>lua require('dotnet-goto').lsp_request_definition()<CR>", { noremap = false, silent = true, desc="Go to Definition (dotnet)" })
+    vim.keymap.set('n', '<Leader>fe', '<cmd>Telescope find_files hidden=true<cr>', { silent = true, noremap = true, desc = 'Find Hidden Files'})
+    vim.keymap.set('n', 'gpd', '<cmd>lua require("goto-preview").goto_preview_definition()<cr>', { silent = true, noremap = true, desc = 'Go to Preview Definition'})
+    vim.keymap.set('n', 'gpt', '<cmd>lua require("goto-preview").goto_preview_type_definition()<cr>', { silent = true, noremap = true, desc = 'Go to Preview Type Definition'})
+    vim.keymap.set('n', 'gpi', '<cmd>lua require("goto-preview").goto_preview_implementation()<cr>', { silent = true, noremap = true, desc = 'Go to Preview Implementation'})
+    vim.keymap.set('n', 'gpD', '<cmd>lua require("goto-preview").goto_preview_declaration()<cr>', { silent = true, noremap = true, desc = 'Go to Preview Declaration'})
+    vim.keymap.set('n', 'gpr', '<cmd>lua require("goto-preview").goto_preview_references()<cr>', { silent = true, noremap = true, desc = 'Go to Preview References'})
+    vim.keymap.set('n', 'gP', '<cmd>lua require("goto-preview").close_all_win()<cr>', { silent = true, noremap = true, desc = 'Close All Windows'})
     vim.g.editorconfig = true
 
     vim.opt.tabstop = 4
     vim.opt.shiftwidth = 4
     vim.opt.expandtab = true
-    vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', { expr = true, replace_keycodes = false, silent = true, noremap = true, desc = "Accept Copilot Suggestion"})
-    vim.g.copilot_no_tab_map = true
-    vim.g.copilot_assume_mapped = true
+    -- vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', { expr = true, replace_keycodes = false, silent = true, noremap = true, desc = "Accept Copilot Suggestion"})
+    -- vim.g.copilot_no_tab_map = true
+    -- vim.g.copilot_assume_mapped = true
     local dap = require('dap')
     dap.adapters.coreclr = {
       type = 'executable',
       command = 'C:/Program Files/Netcoredbg/netcoredbg.exe',
       args = { '--interpreter=vscode'},
-      options = {
-        detached = false,
-      }
     }
 
     dap.configurations.cs = {
@@ -98,10 +106,57 @@ return {
         name = 'launch - netcoredbg',
         request = 'launch',
         program = function()
-          return vim.fn.input('Path to dll', vim.fn.getcwd() .. '/', 'file')
+          return vim.fn.input('Path to dll: ', vim.fn.getcwd() .. '/', 'file')
         end,
       }
     }
+    require('nvim-ts-autotag').setup()
+    vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
+    vim.lsp.diagnostic.on_publish_diagnostics,
+    {
+        underline = true,
+        virtual_text = {
+            spacing = 5,
+            severity_limit = 'Warning',
+        },
+        update_in_insert = true,
+    })
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    capabilities.offsetEncoding = 'utf-8'
+    require('lspconfig').clangd.setup {
+      capabilities = capabilities
+    }
+    local lspkind = require("lspkind")
+    lspkind.init({
+      symbol_map = {
+        Copilot = "",
+      },
+    })
+
+vim.api.nvim_set_hl(0, "CmpItemKindCopilot", {fg ="#6CC644"})
+    local cmp = require("cmp")
+    cmp.setup {
+      sources = {
+        { name = "copilot", group_index = 2 },
+        { name = "nvim_lsp", group_index = 2 },
+        { name = "path", group_index = 2 },
+        { name = "luasnip", group_index = 2 },
+      }
+    }
+    --[[
+    local pid = vim.fn.getpid()
+    local omnisharp_bin = "C:/Users/lalam/AppData/Local/omnisharp-vim/omnisharp-roslyn/OmniSharp.exe"
+    local config = {
+      handlers = {
+        ["textDocument/definition"] = require("omnisharp_extended").handler,
+      },
+      cmd = { omnisharp_bin, '--languageserver', '--hostPID', tostring(pid) },
+      capabilities = capabilities,
+    }
+
+
+    require'lspconfig'.omnisharp.setup(config)
+    --]]
 
     -- vim.keymap.set('n', '<F10>', function() require('dap').step_out() end)
     -- vim.keymap.set('n', '<F9>', function() require('dap').step_into() end)
